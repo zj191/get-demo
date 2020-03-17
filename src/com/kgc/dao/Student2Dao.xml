@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kgc.dao.Student2Dao">
+
+	<!-- <cache/> -->
+	
+	<!-- flushCache="true" -->
+	<!-- useCache="false" -->
+  <insert id="insert" keyColumn="studentNo" keyProperty="studentNo">
+  	insert into student(studentName,sex,gradeId,borndate) values(#{studentName},#{sex},#{grade.gradeId},#{borndate})
+  </insert>
+  
+  <!-- 多对一映射 -->
+  <!-- <resultMap type="Student2" id="stumap">
+  		<id column="studentNo" property="studentNo"/>
+  		<result column="studentName" property="studentName"/>
+  		<result column="sex" property="sex"/>
+  		
+  		<association property="grade" column="gradeId" javaType="Grade">
+  			<id column="gradeId" property="gradeId"/>
+  			<result column="gradeName" property="gradeName"/>
+  		</association>
+  </resultMap> -->
+  
+  <resultMap type="Student2" id="stumap">
+  		<id column="studentNo" property="studentNo"/>
+  		<association property="grade" column="gradeId" select="select2"/>
+  </resultMap>
+  
+  <select id="select2" resultType="Grade">
+  		select * from grade where gradeId=#{gradeId }
+  </select>
+  
+   <select id="select" resultMap="stumap">
+   		select * from student
+   		<!-- select * from student s,grade g where s.gradeId=g.gradeId -->
+   </select>
+   
+   <select id="demo" statementType="CALLABLE" parameterType="map">    
+		{call demo1 (#{p,mode=IN},
+					#{u,mode=INOUT,jdbcType=INTEGER})} 
+	</select>  
+  
+</mapper>

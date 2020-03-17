@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kgc.dao.StudentDao">
+
+	<sql id="where">
+		<where>
+			<if test="studentno!=null and studentno!=0">
+				studentno=#{studentno}
+			</if>
+			<if test="studentname!=null and studentname!=''">
+				or studentname like concat('%',#{studentname},'%')
+			</if>
+			<if test="borndate!=null">
+				<![CDATA[ ]]>
+			   or borndate &lt; #{borndate}
+			</if>
+		</where>
+			<if test="c!=null and b!=null">
+				order by ${c} ${b}
+			</if>
+			<if test="of!=null and size!=null">
+				limit #{of},#{size}
+			</if>
+	</sql>
+	
+	<sql id="where2">
+	<trim prefix="where" prefixOverrides="and | or ">
+		<choose>
+			<when test="studentno!=null and studentno!=0">
+				studentno=#{studentno}
+			</when>
+			<when test="studentname!=null and studentname!=''">
+				or studentname like concat('%',#{studentname},'%')
+			</when>
+			<when test="borndate!=null">
+			   or borndate &lt; #{borndate}
+			</when>
+			<otherwise>
+				and 1=2
+			</otherwise>
+		</choose>
+		</trim>
+	</sql>
+
+	<select id="select" resultType="Student">
+    	select * from student <include refid="where"></include>
+ 	 </select>
+ 	 
+ 	 <select id="select2" resultType="Student">
+    	select * from student <include refid="where2"></include>
+ 	 </select>
+ 	 
+ 	 <select id="selectlist" resultType="Student">
+ 	 	select * from student where studentno in
+ 	 	<foreach item="i" collection="list" open="(" separator="," close=")">
+ 	 		#{i}
+ 	 	</foreach>
+ 	 </select>
+ 	 
+  <update id="update" parameterType="Student">
+  		update student
+  	<set>
+		<if test="studentname!=null and studentname!=''">
+			 studentname=#{studentname},
+		</if>
+		<if test="borndate!=null">
+		  borndate=#{borndate}
+		</if>
+  	</set>
+  		where studentno=#{studentno}
+  </update>
+  
+  <delete id="delete">
+		delete from student <include refid="where2"></include>
+	</delete>
+	
+ 	<select id="selectlike" parameterType="map" resultType="Student">
+    	select * from student where studentno = #{no} or studentname like #{name}
+  	</select>
+ 
+  <select id="selectlike2" resultType="Student">
+    	select * from student where studentno = #{no} or studentname like #{stu.studentname}
+  </select>
+
+  <select id="selectByNo" resultType="Student">
+    	select * from student where studentno = #{studentno}
+  </select>
+  
+    <select id="selectMap" resultType="map">
+    	select * from student
+  </select>
+  
+  <!-- orm映射 -->
+  <resultMap type="Student" id="stuMap">
+  		<id column="studentno" property="studentno"/>
+  		<result column="name" property="studentname"/>
+  </resultMap>
+   <select id="selectAll"  resultMap="stuMap">
+    	select studentno,studentname name,borndate from student
+  </select>
+  
+  <insert id="insert" keyColumn="studentno" keyProperty="studentno">
+  	insert into student(studentname,borndate) values(#{studentname},#{borndate})
+  </insert>
+  
+  <insert id="insertOracle" parameterType="Student">
+  <!-- 	<selectKey keyProperty="studentno" resultType="int" order="BEFORE">
+  			select sys_guid() from dual
+  	</selectKey> -->
+  	insert into student values(#{studentno},#{studentname},#{borndate})
+  	
+  </insert>
+  
+</mapper>
